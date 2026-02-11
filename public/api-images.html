@@ -1,0 +1,100 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>API Analysis</title>
+    <style>
+        body { font-family: monospace; padding: 20px; background: #1a1a2e; color: #eee; }
+        h1 { color: #00ff88; }
+        .section { margin: 20px 0; padding: 15px; background: #16213e; border-radius: 8px; }
+        img { max-width: 200px; border-radius: 8px; margin: 10px 0; }
+        .error { color: #ff6b6b; }
+        .success { color: #00ff88; }
+    </style>
+</head>
+<body>
+    <h1>API Analysis</h1>
+    <pre id="output">Loading...</pre>
+    
+    <script>
+        const SITE_ID = '3d6c918d-5c39-47e9-8109-be79b2e8c302';
+        const API_URL = '/api-proxy';
+        const LOCALE = 'en-US';
+        
+        async function analyzeAPI() {
+            const output = document.getElementById('output');
+            let log = '';
+            
+            function print(msg, isError = false) {
+                log += msg + '\n';
+                output.textContent = log;
+                console.log(msg);
+            }
+            
+            print('=== ANALISANDO API ===\n');
+            
+            // Fetch articles
+            const url = API_URL + '/api/headless/sites-by-id/' + SITE_ID + '?limit=5&offset=0&locale=' + LOCALE;
+            print('URL: ' + url + '\n');
+            
+            try {
+                const response = await fetch(url);
+                print('Status: ' + response.status + '\n');
+                
+                if (!response.ok) {
+                    print('Erro: ' + response.status, true);
+                    return;
+                }
+                
+                const data = await response.json();
+                print('✅ API OK!\n');
+                
+                // Show raw response structure
+                print('=== ESTRUTURA DO RETORNO ===');
+                print('Keys: ' + Object.keys(data).join(', ') + '\n');
+                
+                // Show articles
+                if (data.articles && data.articles.length > 0) {
+                    print('Total artigos: ' + data.articles.length + '\n');
+                    
+                    data.articles.forEach((article, i) => {
+                        print('--- ARTIGO ' + (i+1) + ' ---');
+                        print('ID: ' + article.id);
+                        print('Slug: ' + article.slug);
+                        
+                        // Find locale data
+                        const localeData = article.locales?.find(l => l.locale.toLowerCase() === LOCALE.toLowerCase()) || article.locales?.[0] || {};
+                        print('Locale encontrado: ' + (localeData.locale || 'nenhum'));
+                        
+                        print('Title: ' + (localeData.title || 'n/a'));
+                        print('mainImage: ' + (localeData.mainImage || 'n/a'));
+                        print('imageUrl: ' + (localeData.imageUrl || 'n/a'));
+                        
+                        // Try to show image
+                        const imageUrl = localeData.mainImage || localeData.imageUrl;
+                        if (imageUrl) {
+                            print('\n🖼️ IMAGEM:');
+                            print('URL: ' + imageUrl);
+                            print('\n[IMAGEM]');
+                            const img = document.createElement('img');
+                            img.src = imageUrl;
+                            img.onerror = () => print('❌ ERRO ao carregar imagem: ' + imageUrl, true);
+                            img.onload = () => print('✅ Imagem carregou com sucesso!', false);
+                            document.body.appendChild(img);
+                        }
+                        
+                        print('');
+                    });
+                } else {
+                    print('⚠️ Nenhum artigo encontrado!');
+                    print('\nArtigos (raw): ' + JSON.stringify(data.articles, null, 2));
+                }
+                
+            } catch (error) {
+                print('❌ Erro: ' + error.message, true);
+            }
+        }
+        
+        analyzeAPI();
+    </script>
+</body>
+</html>
