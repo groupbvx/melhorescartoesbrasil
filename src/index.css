@@ -15,7 +15,7 @@ body {
   line-height: 1.6;
 }
 
-/* Custom prose styles for better readability */
+/* Custom prose styles for article content */
 .prose {
   max-width: 65ch;
   line-height: 1.75;
@@ -23,26 +23,56 @@ body {
 
 .prose h2 {
   margin-top: 2em;
-  margin-bottom: 1em;
+  margin-bottom: 0.75em;
   font-weight: 700;
-  font-size: 1.5rem;
+  font-size: 1.75rem;
   color: #1f2937;
+}
+
+.prose h3 {
+  margin-top: 1.5em;
+  margin-bottom: 0.75em;
+  font-weight: 600;
+  font-size: 1.25rem;
+  color: #374151;
+}
+
+.prose h4 {
+  margin-top: 1.25em;
+  margin-bottom: 0.5em;
+  font-weight: 600;
+  font-size: 1.125rem;
+  color: #4b5563;
 }
 
 .prose p {
   margin-bottom: 1.25em;
   color: #4b5563;
+  line-height: 1.8;
 }
 
 .prose ul {
   margin-top: 1em;
-  margin-bottom: 1em;
+  margin-bottom: 1.25em;
   padding-left: 1.5em;
+  list-style-type: disc;
+}
+
+.prose ol {
+  margin-top: 1em;
+  margin-bottom: 1.25em;
+  padding-left: 1.5em;
+  list-style-type: decimal;
 }
 
 .prose li {
   margin-bottom: 0.5em;
   color: #4b5563;
+  line-height: 1.7;
+}
+
+.prose li::marker {
+  color: #3b82f6;
 }
 
 .prose strong {
@@ -50,11 +80,87 @@ body {
   color: #1f2937;
 }
 
+.prose em {
+  font-style: italic;
+}
+
 .prose a {
   color: #2563eb;
   text-decoration: none;
+  border-bottom: 1px solid transparent;
+  transition: border-color 0.2s;
 }
 
 .prose a:hover {
-  text-decoration: underline;
+  border-bottom-color: #2563eb;
+}
+
+.prose blockquote {
+  margin: 1.5em 0;
+  padding: 1em 1.5em;
+  border-left: 4px solid #3b82f6;
+  background-color: #f8fafc;
+  border-radius: 0 0.5rem 0.5rem 0;
+  font-style: italic;
+  color: #475569;
+}
+
+.prose code {
+  font-family: 'Monaco', 'Menlo', 'Ubuntu Mono', monospace;
+  font-size: 0.875em;
+  background-color: #f1f5f9;
+  padding: 0.2em 0.4em;
+  border-radius: 0.25rem;
+  color: #1e293b;
+}
+
+.prose pre {
+  margin: 1.5em 0;
+  padding: 1em;
+  background-color: #1e293b;
+  border-radius: 0.5rem;
+  overflow-x: auto;
+}
+
+.prose pre code {
+  background-color: transparent;
+  padding: 0;
+  color: #e2e8f0;
+  font-size: 0.875em;
+}
+
+.prose img {
+  margin: 1.5em 0;
+  border-radius: 0.5rem;
+  max-width: 100%;
+  height: auto;
+}
+
+.prose hr {
+  margin: 2em 0;
+  border: none;
+  border-top: 1px solid #e5e7eb;
+}
+
+.prose table {
+  margin: 1.5em 0;
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.prose th,
+.prose td {
+  padding: 0.75em 1em;
+  border: 1px solid #e5e7eb;
+  text-align: left;
+}
+
+.prose th {
+  background-color: #f8fafc;
+  font-weight: 600;
+  color: #374151;
+}
+
+.prose td {
+  color: #4b5563;
 }

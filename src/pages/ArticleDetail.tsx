@@ -12,20 +12,11 @@ const FALLBACK_ARTICLES: Record<string, Article & { cardInfo?: any }> = {
         slug: 'nubank-ultravioleta',
         title: 'Nubank Ultravioleta: Vale a Pena?',
         excerpt: 'Análise completa do cartão premium do Nubank',
-        content: `O **Nubank Ultravioleta** é o cartão premium do Nubank.
-
-## O que diferencia o Ultravioleta?
-
-Este cartão traz benefícios exclusivos:
-
-- Metal Premium: Aço inoxidável e tungstênio
-- Atendimento Prioritário: Time dedicado
-- Saques Grátis: Ilimitados internacionalmente
-- Lounge Nubank: Acesso em Guarulhos
-
-## Vale a Pena?
-
-Depende do seu perfil. Viajantes podem se beneficiar.`,
+        content: `<p>O <strong>Nubank Ultravioleta</strong> é o cartão premium do Nubank.</p>
+        <h2>O que diferencia o Ultravioleta?</h2>
+        <p>Este cartão traz benefícios exclusivos:</p>
+        <ul><li>Metal Premium: Aço inoxidável e tungstênio</li><li>Atendimento Prioritário: Time dedicado</li><li>Saques Grátis: Ilimitados internacionalmente</li><li>Lounge Nubank: Acesso em Guarulhos</li></ul>
+        <h2>Vale a Pena?</h2><p>Depende do seu perfil. Viajantes podem se beneficiar.</p>`,
         mainImage: 'https://images.unsplash.com/photo-1563013544-824ae1b704d3?w=1200&q=80',
         publishedAt: '10 Fev 2026',
         readingTime: '5 min',
@@ -35,47 +26,6 @@ Depende do seu perfil. Viajantes podem se beneficiar.`,
             annualFee: 'R$ 490/ano',
             benefits: ['Metal premium', 'Atendimento prioritário', 'Saques internacionais Grátis', 'Lounge Nubank'],
         },
-    },
-    'melhores-cartoes-sem-anuidade': {
-        id: '2',
-        slug: 'melhores-cartoes-sem-anuidade',
-        title: 'Top 10 Cartões sem Anuidade 2026',
-        excerpt: 'Os melhores cartões que não cobram anuidade',
-        content: `A busca por cartões sem anuidade continua forte.
-
-## Ranking dos Melhores
-
-1. **Nubank**: O líder do mercado
-2. **Inter**: Benefícios digitais
-3. **C6 Bank**: Programa de pontos
-
-## Como Escolher?
-
-Avalie taxas, benefícios e qualidade do app.`,
-        mainImage: 'https://images.unsplash.com/photo-1556742049-0cfed4f6a45d?w=1200&q=80',
-        publishedAt: '8 Fev 2026',
-        readingTime: '8 min',
-    },
-    'como-escolher-cartao': {
-        id: '3',
-        slug: 'como-escolher-cartao',
-        title: 'Como Escolher o Cartão Ideal',
-        excerpt: 'Guia completo para escolher seu cartão',
-        content: `Escolher o cartão ideal pode parecer complicado!
-
-## Critérios Importantes
-
-### 1. Anuidade
-Cartões sem anuidade são ideais.
-
-### 2. Programa de Pontos
-Para quem viaja, priorize milhas.
-
-### 3. Taxas de Juros
-Sempre negocie à vista.`,
-        mainImage: 'https://images.unsplash.com/photo-1554224155-8d04cb21cd6c?w=1200&q=80',
-        publishedAt: '5 Fev 2026',
-        readingTime: '6 min',
     },
 };
 
@@ -91,11 +41,9 @@ export function ArticleDetail() {
             try {
                 const data = await ArticleService.getArticleBySlug(slug);
                 if (data) {
-                    // Check if there's additional cardInfo
                     const fullData = FALLBACK_ARTICLES[slug] || data;
                     setArticle(fullData as Article & { cardInfo?: any });
                 } else {
-                    // Try fallback
                     const fallback = FALLBACK_ARTICLES[slug];
                     if (fallback) setArticle(fallback);
                 }
@@ -233,40 +181,14 @@ export function ArticleDetail() {
                             {/* In-Article Ad 1 */}
                             <ReviveInArticle position={1} />
 
+                            {/* Article Content - Render HTML */}
                             <motion.div
                                 initial={{ opacity: 0, y: 20 }}
                                 animate={{ opacity: 1, y: 0 }}
                                 transition={{ delay: 0.2 }}
                                 className="prose prose-lg max-w-none"
-                            >
-                                {article.content.split('\n\n').map((paragraph, i) => {
-                                    if (paragraph.startsWith('## ')) {
-                                        return <h2 key={i} className="text-2xl font-bold mt-10 mb-5 text-gray-800">{paragraph.slice(3)}</h2>;
-                                    }
-                                    if (paragraph.startsWith('### ')) {
-                                        return <h3 key={i} className="text-xl font-semibold mt-8 mb-4 text-gray-800">{paragraph.slice(4)}</h3>;
-                                    }
-                                    if (paragraph.startsWith('- ')) {
-                                        return (
-                                            <ul key={i} className="list-none pl-0 my-6 space-y-3">
-                                                {paragraph.split('\n').map((item, j) => {
-                                                    const cleanItem = item.replace(/^- /, '').trim();
-                                                    if (!cleanItem) return null;
-                                                    return (
-                                                        <li key={j} className="flex items-start gap-3">
-                                                            <div className="w-6 h-6 bg-blue-100 rounded-full flex items-center justify-center flex-shrink-0 mt-0.5">
-                                                                <CheckCircle className="w-4 h-4 text-blue-600" />
-                                                            </div>
-                                                            <span className="text-gray-700">{cleanItem}</span>
-                                                        </li>
-                                                    );
-                                                })}
-                                            </ul>
-                                        );
-                                    }
-                                    return <p key={i} className="text-gray-700 leading-relaxed my-4">{paragraph}</p>;
-                                })}
-                            </motion.div>
+                                dangerouslySetInnerHTML={{ __html: article.content }}
+                            />
 
                             {/* In-Article Ad 2 */}
                             <ReviveInArticle position={2} />
