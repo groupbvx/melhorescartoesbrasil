@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { motion } from 'framer-motion';
-import { Calendar, Clock, ArrowRight, Tag } from 'lucide-react';
+import { Calendar, Clock, Tag } from 'lucide-react';
 import { ReviveBanner } from '../components/ReviveAd';
 import { NewsletterSection } from '../components/NewsletterSection';
 import { ArticleService, type Article } from '../services';
