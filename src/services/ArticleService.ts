@@ -8,7 +8,7 @@ export interface Article {
     excerpt: string;
     content: string;
     mainImage?: string;
-    image?: string; // Alias for mainImage
+    image?: string;
     author?: string;
     publishedAt: string;
     readingTime?: string;
@@ -23,21 +23,8 @@ const MOCK_ARTICLES: Article[] = [
         slug: 'nubank-ultravioleta',
         title: 'Nubank Ultravioleta: Vale a Pena?',
         excerpt: 'Análise completa do cartão premium do Nubank',
-        content: `O **Nubank Ultravioleta** é o cartão premium do Nubank.
-
-## O que diferencia o Ultravioleta?
-
-Este cartão traz benefícios exclusivos:
-
-- Metal Premium: Aço inoxidável e tungstênio
-- Atendimento Prioritário: Time dedicado
-- Saques Grátis: Ilimitados internacionalmente
-- Lounge Nubank: Acesso em Guarulhos
-
-## Vale a Pena?
-
-Depende do seu perfil. Viajantes podem se beneficiar.`,
-        mainImage: 'https://images.unsplash.com/photo-1563013544-824ae1b704d3?w=800&q=80',
+        content: 'Conteúdo completo do artigo...',
+        image: 'https://images.unsplash.com/photo-1563013544-824ae1b704d3?w=800&q=80',
         publishedAt: '10 Fev 2026',
         readingTime: '5 min',
         category: 'Reviews',
@@ -48,18 +35,8 @@ Depende do seu perfil. Viajantes podem se beneficiar.`,
         slug: 'melhores-cartoes-sem-anuidade',
         title: 'Top 10 Cartões sem Anuidade 2026',
         excerpt: 'Os melhores cartões que não cobram anuidade',
-        content: `A busca por cartões sem anuidade continua forte.
-
-## Ranking dos Melhores
-
-1. **Nubank**: O líder do mercado
-2. **Inter**: Benefícios digitais
-3. **C6 Bank**: Programa de pontos
-
-## Como Escolher?
-
-Avalie taxas, benefícios e qualidade do app.`,
-        mainImage: 'https://images.unsplash.com/photo-1556742049-0cfed4f6a45d?w=800&q=80',
+        content: 'Conteúdo completo do artigo...',
+        image: 'https://images.unsplash.com/photo-1556742049-0cfed4f6a45d?w=800&q=80',
         publishedAt: '8 Fev 2026',
         readingTime: '8 min',
         category: 'Comparativos',
@@ -69,20 +46,9 @@ Avalie taxas, benefícios e qualidade do app.`,
         id: '3',
         slug: 'como-escolher-cartao',
         title: 'Como Escolher o Cartão Ideal',
-        excerpt: 'Guia completo para escolher seu cartão',
-        content: `Escolher o cartão ideal pode parecer complicado!
-
-## Critérios Importantes
-
-### 1. Anuidade
-Cartões sem anuidade são ideais.
-
-### 2. Programa de Pontos
-Para quem viaja, priorize milhas.
-
-### 3. Taxas de Juros
-Sempre negocie à vista.`,
-        mainImage: 'https://images.unsplash.com/photo-1554224155-8d04cb21cd6c?w=800&q=80',
+        excerpt: 'Guia completo para escolher seu cartão de crédito',
+        content: 'Conteúdo completo do artigo...',
+        image: 'https://images.unsplash.com/photo-1554224155-8d04cb21cd6c?w=800&q=80',
         publishedAt: '5 Fev 2026',
         readingTime: '6 min',
         category: 'Guias',
@@ -99,7 +65,9 @@ class ArticleServiceClass {
     private cacheTTL = 5 * 60 * 1000;
 
     private constructor() {
-        console.log('[ArticleService] Inicializado com fallback para mock');
+        console.log('[ArticleService] 🔧 Inicializado');
+        console.log('[ArticleService] 📡 API URL:', config.apiUrl);
+        console.log('[ArticleService] 🏷️ Site ID:', config.siteId);
     }
 
     public static getInstance(): ArticleServiceClass {
@@ -112,50 +80,65 @@ class ArticleServiceClass {
     async getArticles(params: { limit?: number; offset?: number } = {}): Promise<Article[]> {
         const { limit = 10, offset = 0 } = params;
 
+        console.log('[ArticleService] 📥 getArticles() chamado - tentando API...');
+        
         try {
             const articles = await this.fetchFromAPI(params);
             if (articles.length > 0) {
-                console.log('[ArticleService] Artigos carregados da API');
+                console.log('[ArticleService] ✅ Artigos carregados da API:', articles.length);
                 return articles;
             }
+            console.log('[ArticleService] ⚠️ API retornou vazio, usando fallback');
         } catch (error) {
-            console.warn('[ArticleService] API falhou, usando fallback:', (error as Error).message);
+            console.warn('[ArticleService] ❌ API falhou:', (error as Error).message);
         }
 
-        console.log('[ArticleService] Usando dados mockados');
+        console.log('[ArticleService] 📋 Usando dados mockados');
         return MOCK_ARTICLES.slice(offset, offset + limit);
     }
 
     private async fetchFromAPI(params: { limit?: number; offset?: number }): Promise<Article[]> {
         const { limit = 10, offset = 0 } = params;
 
+        const queryParams = new URLSearchParams({
+            limit: String(limit),
+            offset: String(offset),
+            locale: config.locale,
+        });
+
+        const apiUrl = `${config.apiUrl}/api/headless/sites-by-id/${config.siteId}?${queryParams}`;
+        console.log('[ArticleService] 🌐 Fetch URL:', apiUrl);
+
         try {
-            const queryParams = new URLSearchParams({
-                limit: String(limit),
-                offset: String(offset),
-                locale: config.locale,
-            });
-
-            const response = await fetch(
-                `${config.apiUrl}/api/headless/sites-by-id/${config.siteId}?${queryParams}`
-            );
-
+            const response = await fetch(apiUrl);
+            console.log('[ArticleService] 📊 Response status:', response.status);
+            
             if (!response.ok) {
                 throw new Error(`HTTP ${response.status}`);
             }
 
+            const contentType = response.headers.get('content-type');
+            console.log('[ArticleService] 📄 Content-Type:', contentType);
+
             const data = await response.json();
+            console.log('[ArticleService] 📦 Data received:', JSON.stringify(data).substring(0, 200));
+            
             return this.mapSnapshotsToArticles(data.articles || []);
         } catch (error) {
+            console.error('[ArticleService] 🚨 Fetch error:', error);
             throw error;
         }
     }
 
     private mapSnapshotsToArticles(snapshots: any[]): Article[] {
-        return snapshots.map((snapshot: any) => {
+        console.log('[ArticleService] 🔄 Mapeando', snapshots.length, 'artigos');
+        
+        return snapshots.map((snapshot: any, index: number) => {
             const localeData = snapshot.locales?.find(
                 (l: any) => l.locale.toLowerCase() === config.locale.toLowerCase()
             ) || snapshot.locales?.[0] || {};
+
+            console.log(`[ArticleService] 📄 Artigo ${index + 1}:`, snapshot.slug);
 
             return {
                 id: snapshot.id,
@@ -179,32 +162,49 @@ class ArticleServiceClass {
     }
 
     async getArticleBySlug(slug: string): Promise<Article | null> {
+        console.log('[ArticleService] 🔍 getArticleBySlug:', slug);
+        
         const cacheKey = `article:${slug}`;
         const cached = this.getFromCache<Article>(cacheKey);
-        if (cached) return cached;
+        if (cached) {
+            console.log('[ArticleService] 💨 Retornando do cache:', slug);
+            return cached;
+        }
+
+        const apiUrl = `${config.apiUrl}/api/headless/sites-by-id/${config.siteId}/articles/${slug}?locale=${config.locale}`;
+        console.log('[ArticleService] 🌐 Fetch URL:', apiUrl);
 
         try {
-            const response = await fetch(
-                `${config.apiUrl}/api/headless/sites-by-id/${config.siteId}/articles/${slug}?locale=${config.locale}`
-            );
+            const response = await fetch(apiUrl);
+            console.log('[ArticleService] 📊 Response status:', response.status);
 
             if (!response.ok) {
-                if (response.status === 404) return this.getMockArticle(slug);
+                if (response.status === 404) {
+                    console.log('[ArticleService] ⚠️ Artigo não encontrado na API');
+                    return this.getMockArticle(slug);
+                }
                 throw new Error(`HTTP ${response.status}`);
             }
 
             const snapshot = await response.json();
             const article = this.mapSnapshotsToArticles([snapshot])[0];
             this.setCache(cacheKey, article);
+            console.log('[ArticleService] ✅ Artigo carregado da API:', slug);
             return article;
-        } catch {
-            console.warn('[ArticleService] API falhar, buscando mock');
+        } catch (error) {
+            console.warn('[ArticleService] ❌ API falhou, buscando mock:', (error as Error).message);
             return this.getMockArticle(slug);
         }
     }
 
     private getMockArticle(slug: string): Article | null {
-        return MOCK_ARTICLES.find(a => a.slug === slug) || null;
+        const article = MOCK_ARTICLES.find(a => a.slug === slug) || null;
+        if (article) {
+            console.log('[ArticleService] 📋 Artigo encontrado no mock:', slug);
+        } else {
+            console.log('[ArticleService] ⚠️ Artigo NÃO encontrado no mock:', slug);
+        }
+        return article;
     }
 
     private getFromCache<T>(key: string): T | null {
