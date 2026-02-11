@@ -10,6 +10,7 @@
     <script>
         const SITE_ID = '3d6c918d-5c39-47e9-8109-be79b2e8c302';
         const API_URL = '/api-proxy';
+        const LOCALE = 'en-US';
         
         async function testAPI() {
             const output = document.getElementById('output');
@@ -27,7 +28,7 @@
             print('');
             
             // Test 1: Fetch articles
-            const url1 = API_URL + '/api/headless/sites-by-id/' + SITE_ID + '?limit=10&offset=0&locale=pt-BR';
+            const url1 = API_URL + '/api/headless/sites-by-id/' + SITE_ID + '?limit=10&offset=0&locale=' + LOCALE;
             print('🌐 URL: ' + url1);
             print('');
             
