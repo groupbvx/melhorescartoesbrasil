@@ -57,6 +57,25 @@ const MOCK_ARTICLES: Article[] = [
 ];
 
 /**
+ * Transforma URLs relativas de imagens para usar o proxy
+ */
+function transformImageUrl(imageUrl: string | null | undefined): string | null {
+    if (!imageUrl) return null;
+    
+    // Se já é URL completa, retorna como está
+    if (imageUrl.startsWith('http://') || imageUrl.startsWith('https://')) {
+        return imageUrl;
+    }
+    
+    // Se começa com /api/, transforma para /api-proxy/api/
+    if (imageUrl.startsWith('/api/')) {
+        return imageUrl.replace('/api/', '/api-proxy/api/');
+    }
+    
+    return imageUrl;
+}
+
+/**
  * ArticleService - Busca artigos com fallback para mock
  */
 class ArticleServiceClass {
@@ -68,6 +87,7 @@ class ArticleServiceClass {
         console.log('[ArticleService] 🔧 Inicializado');
         console.log('[ArticleService] 📡 API URL:', config.apiUrl);
         console.log('[ArticleService] 🏷️ Site ID:', config.siteId);
+        console.log('[ArticleService] 🌐 Locale:', config.locale);
     }
 
     public static getInstance(): ArticleServiceClass {
@@ -80,20 +100,20 @@ class ArticleServiceClass {
     async getArticles(params: { limit?: number; offset?: number } = {}): Promise<Article[]> {
         const { limit = 10, offset = 0 } = params;
 
-        console.log('[ArticleService] 📥 getArticles() chamado - tentando API...');
+        console.log('[ArticleService] 📥 getArticles() - tentando API...');
         
         try {
             const articles = await this.fetchFromAPI(params);
             if (articles.length > 0) {
-                console.log('[ArticleService] ✅ Artigos carregados da API:', articles.length);
+                console.log('[ArticleService] ✅ Artigos da API:', articles.length);
                 return articles;
             }
-            console.log('[ArticleService] ⚠️ API retornou vazio, usando fallback');
+            console.log('[ArticleService] ⚠️ API vazia, usando fallback');
         } catch (error) {
             console.warn('[ArticleService] ❌ API falhou:', (error as Error).message);
         }
 
-        console.log('[ArticleService] 📋 Usando dados mockados');
+        console.log('[ArticleService] 📋 Usando mock:', MOCK_ARTICLES.length, 'artigos');
         return MOCK_ARTICLES.slice(offset, offset + limit);
     }
 
@@ -107,21 +127,19 @@ class ArticleServiceClass {
         });
 
         const apiUrl = `${config.apiUrl}/api/headless/sites-by-id/${config.siteId}?${queryParams}`;
-        console.log('[ArticleService] 🌐 Fetch URL:', apiUrl);
+        console.log('[ArticleService] 🌐 Fetch:', apiUrl);
 
         try {
             const response = await fetch(apiUrl);
-            console.log('[ArticleService] 📊 Response status:', response.status);
+            console.log('[ArticleService] 📊 Status:', response.status);
             
             if (!response.ok) {
                 throw new Error(`HTTP ${response.status}`);
             }
 
-            const contentType = response.headers.get('content-type');
-            console.log('[ArticleService] 📄 Content-Type:', contentType);
-
             const data = await response.json();
-            console.log('[ArticleService] 📦 Data received:', JSON.stringify(data).substring(0, 200));
+            console.log('[ArticleService] 📦 Data keys:', Object.keys(data).join(', '));
+            console.log('[ArticleService] 📄 Artigos count:', data.articles?.length || 0);
             
             return this.mapSnapshotsToArticles(data.articles || []);
         } catch (error) {
@@ -134,11 +152,20 @@ class ArticleServiceClass {
         console.log('[ArticleService] 🔄 Mapeando', snapshots.length, 'artigos');
         
         return snapshots.map((snapshot: any, index: number) => {
+            // Encontrar locale correto
             const localeData = snapshot.locales?.find(
-                (l: any) => l.locale.toLowerCase() === config.locale.toLowerCase()
+                (l: any) => l.locale?.toLowerCase() === config.locale.toLowerCase()
             ) || snapshot.locales?.[0] || {};
 
             console.log(`[ArticleService] 📄 Artigo ${index + 1}:`, snapshot.slug);
+            console.log(`[ArticleService]   mainImage raw:`, localeData.mainImage);
+            console.log(`[ArticleService]   imageUrl raw:`, localeData.imageUrl);
+
+            // Tentar mainImage ou imageUrl
+            const rawImage = localeData.mainImage || localeData.imageUrl || null;
+            const transformedImage = transformImageUrl(rawImage);
+            
+            console.log(`[ArticleService]   🖼️ Image URL:`, transformedImage);
 
             return {
                 id: snapshot.id,
@@ -146,7 +173,8 @@ class ArticleServiceClass {
                 title: localeData.title || snapshot.slug,
                 excerpt: localeData.summary || '',
                 content: localeData.body || '',
-                mainImage: localeData.mainImage || null,
+                mainImage: transformedImage,
+                image: transformedImage,
                 publishedAt: snapshot.publishedAt || new Date().toISOString(),
                 readingTime: this.calculateReadingTime(localeData.body || ''),
                 category: snapshot.category || null,
@@ -156,6 +184,7 @@ class ArticleServiceClass {
     }
 
     private calculateReadingTime(content: string): string {
+        if (!content) return '1 min';
         const words = content.trim().split(/\s+/).length;
         const minutes = Math.ceil(words / 200) || 1;
         return `${minutes} min`;
@@ -167,20 +196,20 @@ class ArticleServiceClass {
         const cacheKey = `article:${slug}`;
         const cached = this.getFromCache<Article>(cacheKey);
         if (cached) {
-            console.log('[ArticleService] 💨 Retornando do cache:', slug);
+            console.log('[ArticleService] 💨 Cache hit:', slug);
             return cached;
         }
 
         const apiUrl = `${config.apiUrl}/api/headless/sites-by-id/${config.siteId}/articles/${slug}?locale=${config.locale}`;
-        console.log('[ArticleService] 🌐 Fetch URL:', apiUrl);
+        console.log('[ArticleService] 🌐 Fetch:', apiUrl);
 
         try {
             const response = await fetch(apiUrl);
-            console.log('[ArticleService] 📊 Response status:', response.status);
+            console.log('[ArticleService] 📊 Status:', response.status);
 
             if (!response.ok) {
                 if (response.status === 404) {
-                    console.log('[ArticleService] ⚠️ Artigo não encontrado na API');
+                    console.log('[ArticleService] ⚠️ 404 - usando mock');
                     return this.getMockArticle(slug);
                 }
                 throw new Error(`HTTP ${response.status}`);
@@ -189,22 +218,16 @@ class ArticleServiceClass {
             const snapshot = await response.json();
             const article = this.mapSnapshotsToArticles([snapshot])[0];
             this.setCache(cacheKey, article);
-            console.log('[ArticleService] ✅ Artigo carregado da API:', slug);
+            console.log('[ArticleService] ✅ OK:', slug);
             return article;
         } catch (error) {
-            console.warn('[ArticleService] ❌ API falhou, buscando mock:', (error as Error).message);
+            console.warn('[ArticleService] ❌ API falhou:', (error as Error).message);
             return this.getMockArticle(slug);
         }
     }
 
     private getMockArticle(slug: string): Article | null {
-        const article = MOCK_ARTICLES.find(a => a.slug === slug) || null;
-        if (article) {
-            console.log('[ArticleService] 📋 Artigo encontrado no mock:', slug);
-        } else {
-            console.log('[ArticleService] ⚠️ Artigo NÃO encontrado no mock:', slug);
-        }
-        return article;
+        return MOCK_ARTICLES.find(a => a.slug === slug) || null;
     }
 
     private getFromCache<T>(key: string): T | null {

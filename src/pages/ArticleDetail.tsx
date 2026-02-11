@@ -137,7 +137,7 @@ export function ArticleDetail() {
             <div 
                 className="relative h-96 bg-gradient-to-br from-blue-900 via-indigo-900 to-purple-900 overflow-hidden"
                 style={{
-                    backgroundImage: `url(${article.mainImage})`,
+                    backgroundImage: `url(${article.image || article.mainImage})`,
                     backgroundSize: 'cover',
                     backgroundPosition: 'center',
                 }}
