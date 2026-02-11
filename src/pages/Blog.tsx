@@ -13,8 +13,8 @@ const FALLBACK_ARTICLES: Article[] = [
         slug: 'nubank-ultravioleta',
         title: 'Nubank Ultravioleta: Vale a Pena?',
         excerpt: 'Análise completa do cartão Nubank Ultravioleta',
-        image: 'https://images.unsplash.com/photo-1563013544-824ae1b704d3?w=800&q=80',
         content: 'Conteúdo completo do artigo...',
+        image: 'https://images.unsplash.com/photo-1563013544-824ae1b704d3?w=800&q=80',
         publishedAt: '10 Fev 2026',
         readingTime: '5 min',
         category: 'Reviews',
@@ -24,8 +24,8 @@ const FALLBACK_ARTICLES: Article[] = [
         slug: 'melhores-cartoes-sem-anuidade',
         title: 'Top 10 Cartões sem Anuidade 2026',
         excerpt: 'Os melhores cartões que não cobram anuidade',
-        image: 'https://images.unsplash.com/photo-1556742049-0cfed4f6a45d?w=800&q=80',
         content: 'Conteúdo completo do artigo...',
+        image: 'https://images.unsplash.com/photo-1556742049-0cfed4f6a45d?w=800&q=80',
         publishedAt: '8 Fev 2026',
         readingTime: '8 min',
         category: 'Comparativos',
@@ -35,8 +35,8 @@ const FALLBACK_ARTICLES: Article[] = [
         slug: 'como-escolher-cartao',
         title: 'Como Escolher o Cartão Ideal',
         excerpt: 'Guia completo para escolher seu cartão de crédito',
-        image: 'https://images.unsplash.com/photo-1554224155-8d04cb21cd6c?w=800&q=80',
         content: 'Conteúdo completo do artigo...',
+        image: 'https://images.unsplash.com/photo-1554224155-8d04cb21cd6c?w=800&q=80',
         publishedAt: '5 Fev 2026',
         readingTime: '6 min',
         category: 'Guias',
@@ -119,43 +119,38 @@ export function Blog() {
                                     transition={{ delay: index * 0.1 }}
                                     className="bg-white rounded-2xl shadow-lg overflow-hidden hover:shadow-2xl transition-all duration-300 transform hover:-translate-y-2 group"
                                 >
-                                    <div className="relative h-52 overflow-hidden">
-                                        <img 
-                                            src={article.image || article.mainImage} 
-                                            alt={article.title}
-                                            className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110"
-                                        />
-                                        <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent" />
-                                        <span className="absolute top-4 left-4 bg-white/90 backdrop-blur text-blue-600 text-xs font-bold px-3 py-1 rounded-full flex items-center gap-1">
-                                            <Tag className="w-3 h-3" />
-                                            {article.category || 'Artigo'}
-                                        </span>
-                                    </div>
-                                    <div className="p-6">
-                                        <h2 className="text-xl font-bold text-gray-800 mb-3 line-clamp-2 group-hover:text-blue-600 transition-colors">
-                                            {article.title}
-                                        </h2>
-                                        <p className="text-gray-600 text-sm mb-4 line-clamp-2">
-                                            {article.excerpt}
-                                        </p>
-                                        <div className="flex items-center gap-4 text-gray-500 text-sm mb-4">
-                                            <span className="flex items-center gap-1">
-                                                <Calendar className="w-4 h-4" />
-                                                {article.publishedAt}
-                                            </span>
-                                            <span className="flex items-center gap-1">
-                                                <Clock className="w-4 h-4" />
-                                                {article.readingTime}
+                                    <Link to={`/artigo/${article.slug}`} className="block">
+                                        <div className="relative h-52 overflow-hidden">
+                                            <img 
+                                                src={article.image || article.mainImage} 
+                                                alt={article.title}
+                                                className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110"
+                                            />
+                                            <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent" />
+                                            <span className="absolute top-4 left-4 bg-white/90 backdrop-blur text-blue-600 text-xs font-bold px-3 py-1 rounded-full flex items-center gap-1">
+                                                <Tag className="w-3 h-3" />
+                                                {article.category || 'Artigo'}
                                             </span>
                                         </div>
-                                        <Link 
-                                            to={`/artigo/${article.slug}`}
-                                            className="inline-flex items-center gap-2 text-blue-600 font-semibold hover:text-blue-700 transition-colors"
-                                        >
-                                            Ler artigo
-                                            <ArrowRight className="w-4 h-4 transform group-hover:translate-x-1 transition-transform" />
-                                        </Link>
-                                    </div>
+                                        <div className="p-6">
+                                            <h2 className="text-xl font-bold text-gray-800 mb-3 line-clamp-2 group-hover:text-blue-600 transition-colors">
+                                                {article.title}
+                                            </h2>
+                                            <p className="text-gray-600 text-sm mb-4 line-clamp-2">
+                                                {article.excerpt}
+                                            </p>
+                                            <div className="flex items-center gap-4 text-gray-500 text-sm mb-0">
+                                                <span className="flex items-center gap-1">
+                                                    <Calendar className="w-4 h-4" />
+                                                    {article.publishedAt}
+                                                </span>
+                                                <span className="flex items-center gap-1">
+                                                    <Clock className="w-4 h-4" />
+                                                    {article.readingTime}
+                                                </span>
+                                            </div>
+                                        </div>
+                                    </Link>
                                 </motion.article>
                             ))}
                         </div>
