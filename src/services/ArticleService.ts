@@ -58,6 +58,7 @@ const MOCK_ARTICLES: Article[] = [
 
 /**
  * Transforma URLs relativas de imagens para usar o proxy
+ * Suporta: /api/content/images/... e /api/...
  */
 function transformImageUrl(imageUrl: string | null | undefined): string | null {
     if (!imageUrl) return null;
@@ -67,9 +68,14 @@ function transformImageUrl(imageUrl: string | null | undefined): string | null {
         return imageUrl;
     }
     
-    // Se começa com /api/, transforma para /api-proxy/api/
+    // Se começa com /api/content/images/, não precisa de proxy (já adicionamos rewrite no Vercel)
+    if (imageUrl.startsWith('/api/content/images/')) {
+        return imageUrl;
+    }
+    
+    // Se começa com /api/ (exceto content/images), transforma para proxy
     if (imageUrl.startsWith('/api/')) {
-        return imageUrl.replace('/api/', '/api-proxy/api/');
+        return '/api-proxy' + imageUrl;
     }
     
     return imageUrl;
