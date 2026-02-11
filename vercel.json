@@ -8,6 +8,10 @@
       "destination": "https://digitalreach.app/:path*"
     },
     {
+      "source": "/api/content/images/:path*",
+      "destination": "https://digitalreach.app/api/content/images/:path*"
+    },
+    {
       "source": "/sitemap.xml",
       "destination": "https://digitalreach.app/api/public/sites/3d6c918d-5c39-47e9-8109-be79b2e8c302/sitemap.xml"
     },
